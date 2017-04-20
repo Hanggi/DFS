@@ -16,16 +16,13 @@ struct thread_args {
 
 int wrap(int lock) {
 	int ret;
-	//printf("%d", lock);
 	ret = __sync_lock_test_and_set(&lock, 1);
-	//printf("%d-%d\n", lock, ret);
 	return ret;
 }
 
 void TLock(int *lock) {
 	while (__sync_lock_test_and_set(lock, 1) == 1) {
 	//while(wrap(lock) == 1) {
-		//printf("in spin\n");
 	}
 }
 
@@ -51,22 +48,17 @@ void *process_request(void *vargs) {
 	int ret = 0;
 	int opt = args->opt;
 
-	//printf("opt: %d\n", opt);
-	//printf("=%d \n", tt);
 	if (opt == 1) {
 		for(i = 0; i < tt; i++) {
 			TLock(&Tlock);
 			count++;
-			//printf("%d\n", count);
 			TUnlock(&Tlock);
 
 		}
-		//printf("%ld \n", count);
 	} else if (opt == 2) {
 		for(i = 0; i < tt; i++) {
 			TTLock(&Tlock);
 			count++;
-			//printf("%d\n", count);
 			TUnlock(&Tlock);
 
 		}
@@ -87,13 +79,11 @@ void *process_request(void *vargs) {
 	} else {
 		printf("option error!\n");
 	}
-	//printf("--%ld \n", count);
 }
 
 
 void CS(int n, int opt) {
 	int i;
-	//int n = 1;
 	pthread_t tid[n];
 	int ret[n];
 	struct thread_args *argsp = (struct thread_args *) malloc(sizeof(struct thread_args));
@@ -114,7 +104,7 @@ void CS(int n, int opt) {
 }
 
 void testWrap(int opt) {
-	int tn[4] = {1, 2, 4, 8};
+	int tn[6] = {1, 2, 4, 8, 16, 32};
 	int i;
 
 	if (opt == 1)
@@ -137,7 +127,7 @@ void testWrap(int opt) {
 		long timeuse1 = 1000000 * (end1.tv_sec - start1.tv_sec) + end1.tv_usec - start1.tv_usec;
 		//printf("=>%ld \n", count);
 		if (count != total) {
-			printf("\nincrement result error! [%d]\n", count);
+			printf("\nincrement result error! [%ld]\n", count);
 		}
 		count = 0;
 		printf("\033[1;36m%11ld\033[0m", timeuse1/1000);
@@ -150,7 +140,7 @@ void timeCheck() {
 
 
 	printf("\033[1;33mStart 1~8 thread\033[0m %d \033[1;33mincreasment...\033[0m\n\n", total);
-	printf("(ms)  [1 thread] [2 thread] [4 thread] [8 thread]\n");
+	printf("(ms)  [1 thread] [2 thread] [4 thread] [8 thread] [16thread] [32thread]\n");
 	testWrap(1);
 	testWrap(2);
 	testWrap(3);
@@ -169,14 +159,7 @@ void timeCheck() {
 }
 
 int main () {
-
 	timeCheck();
-	//int l = 0;
-	//TLock(l);
-
-	//printf("count: \033[1;36m%ld\033[0m, time: \033[1;36m%ld\033[0m ms \n\n", count, timeuse1/1000);
-
-
 
 	return 0;
 }
